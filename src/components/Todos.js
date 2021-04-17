@@ -1,8 +1,11 @@
-import { useState } from "react"
+import { API } from 'aws-amplify'
+import { useEffect, useState } from "react"
 import styles from '../styles/Todos.module.css'
-import todos from "../mocks/todos"
 
-const TodoList = function ({ todoItems, updateTodo, deleteTodo }) {
+import { listTodos } from "../graphql/queries"
+import { createTodo, deleteTodo, updateTodo } from '../graphql/mutations'
+
+const TodoList = function ({ todoItems, updateTodoItem, deleteTodoItem }) {
   return todoItems.map(todo => {
     return <div
       key={todo.id}
@@ -11,12 +14,12 @@ const TodoList = function ({ todoItems, updateTodo, deleteTodo }) {
       <div className={styles.Area}>
         <button
           className={styles.CheckBox}
-          onClick={() => updateTodo(todo)}></button>
+          onClick={() => updateTodoItem(todo)}></button>
         <span>{todo.name}</span>
       </div>
       <button
         className={styles.DeleteButton}
-        onClick={() => deleteTodo(todo)}> x
+        onClick={() => deleteTodoItem(todo)}> x
       </button>
     </div>
   })
@@ -24,40 +27,79 @@ const TodoList = function ({ todoItems, updateTodo, deleteTodo }) {
 
 
 export default function Todos() {
-  const [todoItems, setTodoItems] = useState(todos)
+  const [todoItems, setTodoItems] = useState([])
   const [newTodo, setNewTodo] = useState('')
 
-  const updateTodo = function (todo) {
+  const updateTodoItem = async function (todo) {
     let updatedTodo = todoItems.find(t => t.id === todo.id)
     if (updatedTodo) {
       const index = todoItems.findIndex(t => t.id === todo.id)
       updatedTodo.isDone = !todo.isDone
-      todoItems.splice(index, 1, updatedTodo)
+      let result = await API.graphql({
+        query: updateTodo,
+        variables: {
+          input: {
+            id: updatedTodo.id,
+            name: updatedTodo.name,
+            isDone: updateTodo.isDone
+          }
+        }
+      })
+      if (!result.errors) {
+        todoItems.splice(index, 1, updatedTodo)
+        setTodoItems([...todoItems])
+      }
+    }
+  }
+
+  const deleteTodoItem = async function (todo) {
+    let result = await API.graphql({
+      query: deleteTodo,
+      variables: {
+        input: {
+          id: todo.id
+        }
+      }
+    })
+    if (!result.errors) {
+      let deletedIndex = todoItems.findIndex(t => t.id === todo.id)
+      todoItems.splice(deletedIndex, 1)
       setTodoItems([...todoItems])
     }
   }
 
-  const deleteTodo = function (todo) {
-    let deletedIndex = todoItems.findIndex(t => t.id === todo.id)
-    todoItems.splice(deletedIndex, 1)
-    setTodoItems([...todoItems])
-  }
-
-  const createTodo = () => {
-    todoItems.unshift({
-      id: `t_d_${todoItems.length + 1}`,
+  const createNewTodo = async () => {
+    let newItem = {
       name: newTodo,
       isDone: false
+    }
+    let result = await API.graphql({
+      query: createTodo,
+      variables: {
+        input: newItem
+      }
     })
-    setTodoItems([...todoItems])
-    setNewTodo('')
+    if (!result.errors) {
+      todoItems.unshift({ ...result.data.createTodo })
+      setTodoItems([...todoItems])
+      setNewTodo('')
+    }
   }
 
   const enterNewTodo = (e) => {
     if (e.key === "Enter" && newTodo) {
-      createTodo()
+      createNewTodo()
     }
   }
+
+  useEffect(async () => {
+    let result = await API.graphql({
+      query: listTodos
+    })
+    if (!result.errors) {
+      setTodoItems(result.data.listTodos.items)
+    }
+  }, [])
 
   return <div className={styles.Todos}>
     <div className={styles.FormArea}>
@@ -69,11 +111,11 @@ export default function Todos() {
         onKeyPress={(e) => enterNewTodo(e)}
       />
       <button
-        onClick={createTodo}
+        onClick={createNewTodo}
         disabled={!newTodo}>
          + 
       </button>
     </div>
-    <TodoList todoItems={todoItems} updateTodo={updateTodo} deleteTodo={deleteTodo} />
+    <TodoList todoItems={todoItems} updateTodoItem={updateTodoItem} deleteTodoItem={deleteTodoItem} />
   </div>
 }
