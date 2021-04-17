@@ -1,0 +1,93 @@
+
+.Todos {
+  margin-top: 30px;
+  max-width: 750px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 20px;
+  min-width: 500px;
+}
+
+
+.FormArea {
+  display: flex;
+  height: 50px;
+  width: 100%;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.FormArea input,
+.FormArea button {
+  background-color: var(--dark);
+}
+
+.FormArea input {
+  border: 1px solid var(--border-color);
+  flex: 1;
+  border-right: 0;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.FormArea button {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border: 1px solid var(--border-color);
+  font-size: 1.5em;
+}
+
+.TodoItem {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.TodoItem + .TodoItem {
+  border-top: 1px solid var(--border-color);
+}
+
+
+.TodoItem .Area {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.TodoItem[data-done="true"] span {
+  opacity: 0.3;
+  text-decoration: line-through;
+}
+
+.DeleteButton {
+  border: none;
+  color: #ff2f2f;
+  font-size: 1.4em;
+}
+
+.CheckBox {
+  font-size: 2rem;
+  width: 1em;
+  height: 1em;
+  background-color: var(--dark);
+  border-radius: 100%;
+  border: 1px solid var(--light);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  opacity: .2;
+}
+
+.TodoItem[data-done="true"] .CheckBox {
+  opacity: 1;
+}
+
+.TodoItem[data-done="true"] .CheckBox::after {
+  content: "\2713";
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--light)
+}
