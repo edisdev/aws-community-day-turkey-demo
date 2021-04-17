@@ -35,6 +35,8 @@
   border-bottom-right-radius: 6px;
   border: 1px solid var(--border-color);
   font-size: 1.5em;
+  display: flex;
+  align-items: center;
 }
 
 .TodoItem {
@@ -73,7 +75,6 @@
   background-color: var(--dark);
   border-radius: 100%;
   border: 1px solid var(--light);
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,11 +82,12 @@
   opacity: .2;
 }
 
+
 .TodoItem[data-done="true"] .CheckBox {
   opacity: 1;
 }
 
-.TodoItem[data-done="true"] .CheckBox::after {
+.TodoItem[data-done="true"] .CheckBox_Tick::after {
   content: "\2713";
   font-size: 0.9em;
   font-weight: bold;

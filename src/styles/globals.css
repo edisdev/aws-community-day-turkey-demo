@@ -55,4 +55,34 @@ input:focus {
 
 button:disabled {
   cursor: not-allowed;
+  opacity: .4;
+}
+
+.Loading {
+  display: flex;
+  align-items: center;
+}
+
+@keyframes spinner {
+  from {
+    transform: rotate(0);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.Loading .Spinner {
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 50%;
+  border-width: 3px;
+  border-style: solid;
+  border-top-color: currentColor !important;
+  animation: spinner 800ms linear infinite;
+}
+
+.Loading .LoaderText {
+  font-size: 1em;
 }

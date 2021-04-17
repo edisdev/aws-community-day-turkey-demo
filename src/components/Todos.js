@@ -4,9 +4,13 @@ import styles from '../styles/Todos.module.css'
 
 import { listTodos } from "../graphql/queries"
 import { createTodo, deleteTodo, updateTodo } from '../graphql/mutations'
+import { onCreateTodo, onUpdateTodo, onDeleteTodo } from '../graphql/subscriptions'
+import Loading from './Loading'
 
-const TodoList = function ({ todoItems, updateTodoItem, deleteTodoItem }) {
+const TodoList = function ({ todoItems, updateTodoItem, deleteTodoItem, updatingData, deletingData }) {
   return todoItems.map(todo => {
+    let isDeleting = deletingData.isLoading && deletingData.id === todo.id 
+    let isUpdating = updatingData.isLoading && updatingData.id === todo.id 
     return <div
       key={todo.id}
       className={styles.TodoItem}
@@ -14,12 +18,15 @@ const TodoList = function ({ todoItems, updateTodoItem, deleteTodoItem }) {
       <div className={styles.Area}>
         <button
           className={styles.CheckBox}
-          onClick={() => updateTodoItem(todo)}></button>
+          onClick={() => updateTodoItem(todo)}>
+            {isUpdating ? <Loading/>: <div className={styles.CheckBox_Tick}></div> }
+          </button>
         <span>{todo.name}</span>
       </div>
       <button
         className={styles.DeleteButton}
-        onClick={() => deleteTodoItem(todo)}> x
+        onClick={() => deleteTodoItem(todo)}>
+          {isDeleting ? <Loading/> : <span>x</span>}
       </button>
     </div>
   })
@@ -29,31 +36,68 @@ const TodoList = function ({ todoItems, updateTodoItem, deleteTodoItem }) {
 export default function Todos() {
   const [todoItems, setTodoItems] = useState([])
   const [newTodo, setNewTodo] = useState('')
+  const [deletingData, setDeletingData] = useState({ id: null, isLoading: false })
+  const [updatingData, setUpdatingData] = useState({ id: null, isLoading: false })
+  const [isCreating, setCreating] = useState(false)
 
-  const updateTodoItem = async function (todo) {
-    let updatedTodo = todoItems.find(t => t.id === todo.id)
-    if (updatedTodo) {
-      const index = todoItems.findIndex(t => t.id === todo.id)
-      updatedTodo.isDone = !todo.isDone
-      let result = await API.graphql({
-        query: updateTodo,
-        variables: {
-          input: {
-            id: updatedTodo.id,
-            name: updatedTodo.name,
-            isDone: updateTodo.isDone
-          }
-        }
-      })
-      if (!result.errors) {
-        todoItems.splice(index, 1, updatedTodo)
-        setTodoItems([...todoItems])
-      }
+
+  const fetchTodos = async () => {
+    let result = await API.graphql({
+      query: listTodos
+    })
+    if (!result.errors) {
+      setTodoItems(result.data.listTodos.items)
     }
   }
 
-  const deleteTodoItem = async function (todo) {
+
+  function subscribe() {
+    API.graphql({
+      query: onCreateTodo 
+    })
+    .subscribe({
+      next: (data) => {
+        fetchTodos()
+      }
+    })
+
+    API.graphql({
+      query: onUpdateTodo 
+    })
+    .subscribe({
+      next: (data) => {
+        fetchTodos()
+      }
+    })
+
+    API.graphql({
+      query: onDeleteTodo 
+    })
+    .subscribe({
+      next: (data) => {
+        fetchTodos()
+      }
+    })
+  }
+
+  const updateTodoItem = async (todo) => {
+    setUpdatingData({ id: todo.id, isLoading: true })
     let result = await API.graphql({
+      query: updateTodo,
+      variables: {
+        input: {
+          id: todo.id,
+          name: todo.name,
+          isDone: !todo.isDone
+        }
+      }
+    })
+    setUpdatingData({ id: null, isLoading: false })
+  }
+
+  const deleteTodoItem = async (todo) => {
+    setDeletingData({ id: todo.id, isLoading: true })
+    await API.graphql({
       query: deleteTodo,
       variables: {
         input: {
@@ -61,14 +105,11 @@ export default function Todos() {
         }
       }
     })
-    if (!result.errors) {
-      let deletedIndex = todoItems.findIndex(t => t.id === todo.id)
-      todoItems.splice(deletedIndex, 1)
-      setTodoItems([...todoItems])
-    }
+    setDeletingData({ id: null, isLoading: false })
   }
 
   const createNewTodo = async () => {
+    setCreating(true)
     let newItem = {
       name: newTodo,
       isDone: false
@@ -79,11 +120,11 @@ export default function Todos() {
         input: newItem
       }
     })
+
     if (!result.errors) {
-      todoItems.unshift({ ...result.data.createTodo })
-      setTodoItems([...todoItems])
       setNewTodo('')
     }
+    setCreating(false)
   }
 
   const enterNewTodo = (e) => {
@@ -93,12 +134,8 @@ export default function Todos() {
   }
 
   useEffect(async () => {
-    let result = await API.graphql({
-      query: listTodos
-    })
-    if (!result.errors) {
-      setTodoItems(result.data.listTodos.items)
-    }
+    await fetchTodos()
+    subscribe()
   }, [])
 
   return <div className={styles.Todos}>
@@ -112,10 +149,15 @@ export default function Todos() {
       />
       <button
         onClick={createNewTodo}
-        disabled={!newTodo}>
-         + 
+        disabled={!newTodo || isCreating}>
+         {isCreating ? <Loading/>: <span>+</span>}
       </button>
     </div>
-    <TodoList todoItems={todoItems} updateTodoItem={updateTodoItem} deleteTodoItem={deleteTodoItem} />
+    <TodoList
+      todoItems={todoItems}
+      updateTodoItem={updateTodoItem}
+      deleteTodoItem={deleteTodoItem}
+      updatingData={updatingData}
+      deletingData={deletingData}/>
   </div>
 }
