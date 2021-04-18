@@ -86,7 +86,7 @@ export default function Todos () {
 
   const updateTodoItem = async (todo) => {
     setUpdatingData({ id: todo.id, isLoading: true })
-    let result = await API.graphql({
+    await API.graphql({
       query: updateTodo,
       variables: {
         input: {

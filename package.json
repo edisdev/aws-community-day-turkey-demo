@@ -19,7 +19,7 @@
   "devDependencies": {
     "eslint": "^7.24.0",
     "eslint-plugin-react": "^7.23.2",
-    "husky": "^6.0.0"
+    "husky": "^4.3.6"
   },
   "husky": {
     "hooks": {
