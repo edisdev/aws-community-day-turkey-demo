@@ -52,7 +52,7 @@ export default function Todos() {
 
 
   function subscribe() {
-    API.graphql({
+    const createSub = API.graphql({
       query: onCreateTodo 
     })
     .subscribe({
@@ -61,7 +61,7 @@ export default function Todos() {
       }
     })
 
-    API.graphql({
+    const updateSub = API.graphql({
       query: onUpdateTodo 
     })
     .subscribe({
@@ -70,7 +70,7 @@ export default function Todos() {
       }
     })
 
-    API.graphql({
+    const deleteSub = API.graphql({
       query: onDeleteTodo 
     })
     .subscribe({
@@ -78,6 +78,10 @@ export default function Todos() {
         fetchTodos()
       }
     })
+
+    const subscriptions = [createSub, updateSub, deleteSub]
+
+    return () => subscriptions.forEach(subscription => subscription.unsubscribe())
   }
 
   const updateTodoItem = async (todo) => {
@@ -135,7 +139,8 @@ export default function Todos() {
 
   useEffect(async () => {
     await fetchTodos()
-    subscribe()
+    const unsubscribe = subscribe()
+    return unsubscribe
   }, [])
 
   return <div className={styles.Todos}>
@@ -150,7 +155,7 @@ export default function Todos() {
       <button
         onClick={createNewTodo}
         disabled={!newTodo || isCreating}>
-         {isCreating ? <Loading/>: <span>+</span>}
+          {isCreating ? <Loading/>: <span>+</span>}
       </button>
     </div>
     <TodoList
