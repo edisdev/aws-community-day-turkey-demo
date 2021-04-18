@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "yarn eslint ./ --ext .js",
     "lint:fix": "yarn lint --fix",
-    "precommit": "yarn lint --fix && yarn stlint --fix"
+    "precommit": "yarn lint --fix"
   },
   "dependencies": {
     "aws-amplify": "^3.3.27",
