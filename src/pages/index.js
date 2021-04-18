@@ -1,9 +1,10 @@
+import React from 'react'
 import Head from 'next/head'
 import Todos from '../components/Todos'
 
 import styles from '../styles/Home.module.css'
 
-export default function Home() {
+export default function Home () {
   return (
     <div className={styles.container}>
       <Head>

@@ -1,8 +1,8 @@
+import React, { useEffect, useState } from 'react'
 import { API } from 'aws-amplify'
-import { useEffect, useState } from "react"
 import styles from '../styles/Todos.module.css'
 
-import { listTodos } from "../graphql/queries"
+import { listTodos } from '../graphql/queries'
 import { createTodo, deleteTodo, updateTodo } from '../graphql/mutations'
 import { onCreateTodo, onUpdateTodo, onDeleteTodo } from '../graphql/subscriptions'
 import Loading from './Loading'
@@ -19,21 +19,21 @@ const TodoList = function ({ todoItems, updateTodoItem, deleteTodoItem, updating
         <button
           className={styles.CheckBox}
           onClick={() => updateTodoItem(todo)}>
-            {isUpdating ? <Loading/>: <div className={styles.CheckBox_Tick}></div> }
-          </button>
+          {isUpdating ? <Loading/>: <div className={styles.CheckBox_Tick}></div> }
+        </button>
         <span>{todo.name}</span>
       </div>
       <button
         className={styles.DeleteButton}
         onClick={() => deleteTodoItem(todo)}>
-          {isDeleting ? <Loading/> : <span>x</span>}
+        {isDeleting ? <Loading/> : <span>x</span>}
       </button>
     </div>
   })
 }
 
 
-export default function Todos() {
+export default function Todos () {
   const [todoItems, setTodoItems] = useState([])
   const [newTodo, setNewTodo] = useState('')
   const [deletingData, setDeletingData] = useState({ id: null, isLoading: false })
@@ -51,33 +51,33 @@ export default function Todos() {
   }
 
 
-  function subscribe() {
+  function subscribe () {
     const createSub = API.graphql({
       query: onCreateTodo 
     })
-    .subscribe({
-      next: (data) => {
-        fetchTodos()
-      }
-    })
+      .subscribe({
+        next: () => {
+          fetchTodos()
+        }
+      })
 
     const updateSub = API.graphql({
       query: onUpdateTodo 
     })
-    .subscribe({
-      next: (data) => {
-        fetchTodos()
-      }
-    })
+      .subscribe({
+        next: () => {
+          fetchTodos()
+        }
+      })
 
     const deleteSub = API.graphql({
       query: onDeleteTodo 
     })
-    .subscribe({
-      next: (data) => {
-        fetchTodos()
-      }
-    })
+      .subscribe({
+        next: () => {
+          fetchTodos()
+        }
+      })
 
     const subscriptions = [createSub, updateSub, deleteSub]
 
@@ -86,7 +86,7 @@ export default function Todos() {
 
   const updateTodoItem = async (todo) => {
     setUpdatingData({ id: todo.id, isLoading: true })
-    let result = await API.graphql({
+    await API.graphql({
       query: updateTodo,
       variables: {
         input: {
@@ -132,7 +132,7 @@ export default function Todos() {
   }
 
   const enterNewTodo = (e) => {
-    if (e.key === "Enter" && newTodo) {
+    if (e.key === 'Enter' && newTodo) {
       createNewTodo()
     }
   }
@@ -155,7 +155,7 @@ export default function Todos() {
       <button
         onClick={createNewTodo}
         disabled={!newTodo || isCreating}>
-          {isCreating ? <Loading/>: <span>+</span>}
+        {isCreating ? <Loading/>: <span>+</span>}
       </button>
     </div>
     <TodoList
