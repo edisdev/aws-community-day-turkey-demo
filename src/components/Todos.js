@@ -19,7 +19,7 @@ const TodoList = function ({ todoItems, updateTodoItem, deleteTodoItem, updating
         <button
           className={styles.CheckBox}
           onClick={() => updateTodoItem(todo)}>
-          {isUpdating ? <Loading/>: <div className={styles.CheckBox_Tick}></div> }
+          {isUpdating ? <Loading/>: <div className={styles.CheckBox_Tick}></div>}
         </button>
         <span>{todo.name}</span>
       </div>

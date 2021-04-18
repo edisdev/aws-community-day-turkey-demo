@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "yarn eslint ./ --ext .js",
     "lint:fix": "yarn lint --fix",
-    "precommit": "yarn lint --fix && yarn stlint --fix"
+    "precommit": "yarn lint --fix"
   },
   "dependencies": {
     "aws-amplify": "^3.3.27",
@@ -19,7 +19,7 @@
   "devDependencies": {
     "eslint": "^7.24.0",
     "eslint-plugin-react": "^7.23.2",
-    "husky": "^6.0.0"
+    "husky": "^4.3.6"
   },
   "husky": {
     "hooks": {
