@@ -14,7 +14,7 @@ export default function Home () {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Yapılacaklar</h1>
-        <section>
+        <section className={styles.todosSection}>
           <Todos/>
         </section>
       </main>
